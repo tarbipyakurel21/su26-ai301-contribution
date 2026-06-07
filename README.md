@@ -1,35 +1,34 @@
-# Contribution [#]: [Issue Title]
+# Contribution 1: Classify Iceberg CommitFailedException as TRANSACTION_CONFLICT
+ #16770
 
-**Contribution Number:** [1 / 2 / 3]  
+**Contribution Number:** 1  
 **Student:** Tarbi Pyakurel
-**Issue:** [GitHub issue link]  
-**Status:** Phase I In Progress 
+**Issue:** (https://github.com/trinodb/trino/issues/16770) 
+**Status:** Phase I Complete
 
 ---
 
 ## Why I Chose This Issue
-
-[1-2 paragraphs explaining why this issue interests you, how it matches your skills/learning goals, what you hope to learn]
-
+I chose this issue because this is an error handling being generic instead of specific. It would really help to figure out issues clear with proper error handling plus it matches my skills level as I am pointed in a direction to wrap the generic errors as a certain specific execption class named Trino Execption. I hope to learn error handling and database engine from this issue.
 ---
 
 ## Understanding the Issue
 
 ### Problem Description
-
-[In your own words, what's broken or missing?]
+Error classification is incorrect or too generic.
 
 ### Expected Behavior
 
-[What should happen?]
+Specific error should be given.
 
 ### Current Behavior
 
-[What actually happens?]
+Generic error handling is provided instead of specific error handling.
+
 
 ### Affected Components
 
-[Which parts of the codebase are involved?]
+Error handling.
 
 ---
 
