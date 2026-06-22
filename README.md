@@ -134,8 +134,8 @@ MigrationUtils — addFiles()
 MigrateProcedure — migrate()
 
 - **Key commits:**
-https://github.com/trinodb/trino/pull/29982/changes/64efe199e72238839b629bb4fb03ecfcdae7d74a
-https://github.com/trinodb/trino/pull/29982/changes/a20479557451ce642d47d864564199925fb4fe77
+- https://github.com/trinodb/trino/pull/29982/changes/64efe199e72238839b629bb4fb03ecfcdae7d74a
+- https://github.com/trinodb/trino/pull/29982/changes/a20479557451ce642d47d864564199925fb4fe77
 
 - **Approach decisions:** [Why you chose certain approaches]
 
