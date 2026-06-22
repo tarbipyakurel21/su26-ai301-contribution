@@ -4,7 +4,7 @@
 **Contribution Number:** 1  
 **Student:** Tarbi Pyakurel
 **Issue:** (https://github.com/trinodb/trino/issues/16770) 
-**Status:** Phase II Complete
+**Status:** Phase III Complete
 
 ---
 
@@ -25,7 +25,7 @@ CommitFailedException should produce a TrinoException with error code TRANSACTIO
 The error surfaces as ICEBERG_COMMIT_ERROR (an external error) with no hint that it was caused by concurrent writers.
 
 ### Affected Components
-plugin/trino-iceberg — IcebergMetadata.java and AbstractTrinoCatalog.java.
+plugin/trino-iceberg — IcebergMetadata.java, AbstractTrinoCatalog.java, MigrationUtils.java, MigrateProcedure.java
 
 ---
 
@@ -98,46 +98,40 @@ TestIcebergLocalConcurrentWrites.java — already updated with error code assert
 
 ## Testing Strategy
 
-### Unit Tests
-
-- [ ] Test case 1: [Description]
-- [ ] Test case 2: [Description]
-- [ ] Test case 3: [Description]
-
-### Integration Tests
-
-- [ ] Integration scenario 1
-- [ ] Integration scenario 2
-
 ### Manual Testing
+Ran testConcurrentOverlappingUpdate (3 repeated runs) from plugin/trino-iceberg/ after applying the fix:
 
-[What you tested manually and results]
+
+mvn clean test -Dtest="TestIcebergLocalConcurrentWrites#testConcurrentOverlappingUpdate" -DfailIfNoTests=false
+Result: Tests run: 3, Failures: 0, Errors: 0 — concurrent conflict now surfaces as TRANSACTION_CONFLICT with the message "Failed to commit the transaction during write...".
+
+### CI Testing
+Code passed all CI tests
 
 ---
 
 ## Implementation Notes
 
-### Week [X] Progress
+### Week 1 Progress
+Reproduced the issue by adding an error code assertion to the existing concurrent writes test. Traced the exception path from Iceberg's catalog implementations up through IcebergMetadata to understand why CommitFailedException is always a conflict (not an infra failure). Planned the fix across all four affected files.
 
-[What you built this week, challenges faced, decisions made]
-
-### Week [Y] Progress
-
-[Continue documenting as you work]
+### Week 2 Progress
+Implemented the fix in IcebergMetadata.java first (atomic commit), verified the test passed, then extended the same pattern to AbstractTrinoCatalog.java, MigrationUtils.java, and MigrateProcedure.java. Ran the airstyle formatter after each edit. Pushed all changes to the open PR.
 
 ### Code Changes
 
-- **Files modified:**
-IcebergMetadata — commitUpdate() and commitTransaction()
-AbstractTrinoCatalog — createMaterializedViewStorageTable() and replaceMaterializedViewStorageTable()
-MigrationUtils — addFiles()
-MigrateProcedure — migrate()
+Files modified:
+IcebergMetadata.java — commitUpdate() and commitTransaction()
+AbstractTrinoCatalog.java — createMaterializedViewStorageTable() and replaceMaterializedViewStorageTable()
+MigrationUtils.java — addFiles()
+MigrateProcedure.java — migrate()
 
-- **Key commits:**
-- https://github.com/trinodb/trino/pull/29982/changes/64efe199e72238839b629bb4fb03ecfcdae7d74a
-- https://github.com/trinodb/trino/pull/29982/changes/a20479557451ce642d47d864564199925fb4fe77
+Key commits:
+a2047955 — IcebergMetadata fix
+64efe199 — remaining three files
 
-- **Approach decisions:** [Why you chose certain approaches]
+- **Approach decisions:**
+Used a specific catch (CommitFailedException e) block placed before the generic catch (Exception e) in each file — this is the standard Java pattern for catching a specific subtype before a broader one. Kept error messages consistent with the existing style in each file.
 
 ---
 
@@ -148,10 +142,8 @@ MigrateProcedure — migrate()
 **PR Description:** Map CommitFailedException to TRANSACTION_CONFLICT instead of ICEBERG_COMMIT_ERROR across all Iceberg commit calls. CommitFailedException is thrown exclusively for concurrent write conflicts — infrastructure failures use CommitStateUnknownException. Using TRANSACTION_CONFLICT (a user-error type) allows clients to distinguish a retriable conflict from a real infrastructure failure.
 
 **Maintainer Feedback:**
-- [Date]: [Summary of feedback received]
-- [Date]: [How you addressed it]
 
-**Status:** [Awaiting review / Iterating / Approved / Merged]
+**Status:** [Awaiting review]
 
 ---
 
@@ -159,20 +151,20 @@ MigrateProcedure — migrate()
 
 ### Technical Skills Gained
 
-[What you learned technically]
+Learned how Trino's error code system (StandardErrorCode vs plugin-specific codes like IcebergErrorCode) distinguishes user errors from infrastructure errors. Learned how Iceberg separates concurrent write conflicts (CommitFailedException) from infrastructure failures (CommitStateUnknownException) by design.
 
 ### Challenges Overcome
 
-[What was hard and how you solved it]
+The hardest part was writing a test assertion that works in both embedded and distributed (DistributedQueryRunner) mode. In distributed mode, exceptions are serialized over HTTP and come back as FailureException, not TrinoException, which broke a naive instanceof check. Resolved by relying on the message pattern check, which uniquely identifies the new catch block.
 
 ### What I'd Do Differently Next Time
 
-[Reflection on your process]
+Start with a smaller, more targeted change and let reviewer feedback guide whether to expand scope — rather than fixing all four files upfront and then needing to explain the full scope in the PR.
 
 ---
 
 ## Resources Used
 
-- [Link to helpful documentation]
-- [Tutorial or Stack Overflow post that helped]
-- [GitHub issues or discussions that helped]
+Trino DEVELOPMENT.md
+Iceberg CommitFailedException javadoc
+Previous attempt PR #16928 — helped understand what reviewers would ask
