@@ -114,10 +114,10 @@ Code passed all CI tests
 
 ## Implementation Notes
 
-Week 1 Progress
+### Week 1 Progress
 Reproduced the issue by adding an error code assertion to the existing concurrent writes test. Traced the exception path from Iceberg's catalog implementations up through IcebergMetadata to understand why CommitFailedException is always a conflict (not an infra failure). Planned the fix across all four affected files.
 
-Week 2 Progress
+### Week 2 Progress
 Implemented the fix in IcebergMetadata.java first, verified the test passed, then extended the same pattern to AbstractTrinoCatalog.java, MigrationUtils.java, and MigrateProcedure.java. Ran the airstyle formatter after each edit. Pushed all changes to the open PR.
 
 
