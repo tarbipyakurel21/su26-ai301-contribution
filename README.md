@@ -9,7 +9,7 @@
 ---
 
 ## Why I Chose This Issue
-I chose this issue because this is an error handling being generic instead of specific. It would really help to figure out issues clear with proper error handling plus it matches my skills level as I am pointed in a direction to wrap the generic errors as a certain specific execption class named Trino Execption. I hope to learn error handling and database engines from this issue.
+I chose this issue because this is an error handling being generic instead of specific. It would really help to figure out issues clear with proper error handling plus it matches my skills level as I am pointed in a direction to wrap the generic errors as a certain specific execption class named Trino Execption. I hope to learn error handling and database query plugins from this issue.
 
 ---
 
