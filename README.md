@@ -88,15 +88,17 @@ AbstractTrinoCatalog.java — wrap bare transaction.commitTransaction() in creat
 TestIcebergLocalConcurrentWrites.java — already updated with error code assertion.
 
 
-**Implement:** [Link to your branch/commits as you work]
+**Implement:** Commits linked below in Implementation Notes.
 
-**Review:** [Self-review checklist - does it follow the project's contribution guidelines?]
+**Review:** Followed Trino's contribution guidelines — ran airstyle:format after every edit, no wildcard imports, braces on all catch blocks.
 
-**Evaluate:** [How will you verify it works?]
+**Evaluate:** Ran testConcurrentOverlappingUpdate 3 times after the fix — all passed with TRANSACTION_CONFLICT and the correct message.
 
 ---
 
 ## Testing Strategy
+
+No new tests were added. The existing testConcurrentOverlappingUpdate in TestIcebergLocalConcurrentWrites.java already exercises the fixed code path — it triggers concurrent conflicting updates and catches the exception. I used it to reproduce the issue (by temporarily adding an error code assertion that failed with ICEBERG_COMMIT_ERROR) and to verify the fix (the same assertion passed after the change, and the message "Failed to commit the transaction during write..." confirms the new catch block is hit).
 
 ### Manual Testing
 Ran testConcurrentOverlappingUpdate (3 repeated runs) from plugin/trino-iceberg/ after applying the fix:
@@ -112,11 +114,12 @@ Code passed all CI tests
 
 ## Implementation Notes
 
-### Week 1 Progress
+Week 1 Progress
 Reproduced the issue by adding an error code assertion to the existing concurrent writes test. Traced the exception path from Iceberg's catalog implementations up through IcebergMetadata to understand why CommitFailedException is always a conflict (not an infra failure). Planned the fix across all four affected files.
 
-### Week 2 Progress
-Implemented the fix in IcebergMetadata.java first (atomic commit), verified the test passed, then extended the same pattern to AbstractTrinoCatalog.java, MigrationUtils.java, and MigrateProcedure.java. Ran the airstyle formatter after each edit. Pushed all changes to the open PR.
+Week 2 Progress
+Implemented the fix in IcebergMetadata.java first, verified the test passed, then extended the same pattern to AbstractTrinoCatalog.java, MigrationUtils.java, and MigrateProcedure.java. Ran the airstyle formatter after each edit. Pushed all changes to the open PR.
+
 
 ### Code Changes
 
@@ -127,11 +130,12 @@ MigrationUtils.java — addFiles()
 MigrateProcedure.java — migrate()
 
 Key commits:
+
 https://github.com/trinodb/trino/pull/29982/changes/a20479557451ce642d47d864564199925fb4fe77 — IcebergMetadata fix
 https://github.com/trinodb/trino/pull/29982/changes/64efe199e72238839b629bb4fb03ecfcdae7d74a — remaining three files
 
 - **Approach decisions:**
-Used a specific catch (CommitFailedException e) block placed before the generic catch (Exception e) in each file — this is the standard Java pattern for catching a specific subtype before a broader one. Kept error messages consistent with the existing style in each file.
+Used a specific catch (CommitFailedException e) block placed before the generic catch (Exception e) in each file which is the standard Java pattern for catching a specific subtype before a broader one. Kept error messages consistent with the existing style in each file.
 
 ---
 
@@ -159,7 +163,7 @@ The hardest part was writing a test assertion that works in both embedded and di
 
 ### What I'd Do Differently Next Time
 
-Start with a smaller, more targeted change and let reviewer feedback guide whether to expand scope — rather than fixing all four files upfront and then needing to explain the full scope in the PR.
+Start with a smaller, more targeted change and let reviewer feedback guide whether to expand scope rather than fixing all four files upfront and then needing to explain the full scope in the PR.
 
 ---
 
