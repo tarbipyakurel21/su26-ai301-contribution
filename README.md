@@ -159,7 +159,7 @@ Learned how Trino's error code system (StandardErrorCode vs plugin-specific code
 
 ### Challenges Overcome
 
-The hardest part was writing a test assertion that works in both embedded and distributed (DistributedQueryRunner) mode. In distributed mode, exceptions are serialized over HTTP and come back as FailureException, not TrinoException, which broke a naive instanceof check. Resolved by relying on the message pattern check, which uniquely identifies the new catch block.
+Testing without adding a new dependency: When I tried to add an error code assertion to verify the fix, I discovered that TestIcebergLocalConcurrentWrites uses a DistributedQueryRunner, which serializes exceptions over HTTP. The exception comes back as FailureException instead of TrinoException, which meant checking the error code directly would require importing trino-client as a new test dependency. Rather than add a dependency just for one assertion, I relied on the existing message pattern check — the message "Failed to commit the transaction during write..." only appears in the new catch block, which is enough to confirm the fix is working.
 
 ### What I'd Do Differently Next Time
 
