@@ -127,17 +127,25 @@ TestIcebergLocalConcurrentWrites.java — already updated with error code assert
 
 ### Code Changes
 
-- **Files modified:** [List]
-- **Key commits:** [Links to important commits]
+- **Files modified:**
+IcebergMetadata — commitUpdate() and commitTransaction()
+AbstractTrinoCatalog — createMaterializedViewStorageTable() and replaceMaterializedViewStorageTable()
+MigrationUtils — addFiles()
+MigrateProcedure — migrate()
+
+- **Key commits:**
+https://github.com/trinodb/trino/pull/29982/changes/64efe199e72238839b629bb4fb03ecfcdae7d74a
+https://github.com/trinodb/trino/pull/29982/changes/a20479557451ce642d47d864564199925fb4fe77
+
 - **Approach decisions:** [Why you chose certain approaches]
 
 ---
 
 ## Pull Request
 
-**PR Link:** [GitHub PR URL when submitted]
+**PR Link:** https://github.com/trinodb/trino/pull/29982
 
-**PR Description:** [Draft or final PR description - much of the content above can be adapted]
+**PR Description:** Map CommitFailedException to TRANSACTION_CONFLICT instead of ICEBERG_COMMIT_ERROR across all Iceberg commit calls. CommitFailedException is thrown exclusively for concurrent write conflicts — infrastructure failures use CommitStateUnknownException. Using TRANSACTION_CONFLICT (a user-error type) allows clients to distinguish a retriable conflict from a real infrastructure failure.
 
 **Maintainer Feedback:**
 - [Date]: [Summary of feedback received]
