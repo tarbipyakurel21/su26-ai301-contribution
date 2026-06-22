@@ -127,8 +127,8 @@ MigrationUtils.java — addFiles()
 MigrateProcedure.java — migrate()
 
 Key commits:
-a2047955 — IcebergMetadata fix
-64efe199 — remaining three files
+https://github.com/trinodb/trino/pull/29982/changes/a20479557451ce642d47d864564199925fb4fe77 — IcebergMetadata fix
+https://github.com/trinodb/trino/pull/29982/changes/64efe199e72238839b629bb4fb03ecfcdae7d74a — remaining three files
 
 - **Approach decisions:**
 Used a specific catch (CommitFailedException e) block placed before the generic catch (Exception e) in each file — this is the standard Java pattern for catching a specific subtype before a broader one. Kept error messages consistent with the existing style in each file.
